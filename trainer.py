@@ -23,9 +23,11 @@ class Trainer:
             self.scaler = torch.cuda.amp.GradScaler(enabled=True)
         self.loss = loss
 
-        if CFG.distribute and args.local_rank != -1:
-            model.to(device)
-            self.model = DDP(model, device_ids=[args.local_rank])
+        # if CFG.distribute and args.local_rank != -1:
+        #     model.to(device)
+        #     self.model = DDP(model, device_ids=[args.local_rank])
+        
+        self.model = nn.DataParallel(model.cuda())
 
         self.train_loader = train_loader
         self.val_loader = val_loader

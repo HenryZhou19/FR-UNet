@@ -17,10 +17,11 @@ def main(CFG, args):
     with_val = args.val
     seed_torch()
 
-    if CFG.distribute and args.local_rank != -1:
-        torch.cuda.set_device(args.local_rank)
-        torch.distributed.init_process_group(backend='nccl', init_method='env://')
-        device = torch.device('cuda', args.local_rank)
+    device=None
+    # if CFG.distribute and args.local_rank != -1:
+    #     torch.cuda.set_device(args.local_rank)
+    #     torch.distributed.init_process_group(backend='nccl', init_method='env://')
+    #     device = torch.device('cuda', args.local_rank)
 
     if with_val:
         train_dataset = vessel_dataset(data_path, mode="training", split=0.9)
@@ -31,9 +32,10 @@ def main(CFG, args):
     else:
         train_dataset = vessel_dataset(data_path, mode="training")
     
-    train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
+    # train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
     train_loader = DataLoader(
-        train_dataset, batch_size, sampler=train_sampler, shuffle=False, num_workers=16, pin_memory=True, drop_last=True)
+        # train_dataset, batch_size, sampler=train_sampler, shuffle=False, num_workers=16, pin_memory=True, drop_last=True)
+        train_dataset, batch_size, shuffle=True, num_workers=16, pin_memory=True, drop_last=True)
 
     logger.info('The patch number of train is %d' % len(train_dataset))
     model = get_instance(models, 'model', CFG)
