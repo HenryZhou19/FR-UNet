@@ -57,9 +57,12 @@ class Fix_RandomRotation(object):
         return format_string
 
 
-def dir_exists(path):
+def dir_exists(path, must_new=False):
     if not os.path.exists(path):
         os.makedirs(path)
+    else:
+        if must_new:
+            raise AssertionError
 
 
 def remove_files(path):

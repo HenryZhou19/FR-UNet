@@ -13,15 +13,20 @@ from tqdm import tqdm
 from utils.helpers import dir_exists, get_instance, remove_files, double_threshold_iteration
 from utils.metrics import AverageMeter, get_metrics, get_metrics, count_connect_component
 import ttach as tta
+from torch.nn.parallel import DistributedDataParallel as DDP
 
 
 class Trainer:
-    def __init__(self, model, CFG=None, loss=None, train_loader=None, val_loader=None):
+    def __init__(self, model, CFG=None, loss=None, train_loader=None, val_loader=None, device=None, args=None):
         self.CFG = CFG
         if self.CFG.amp is True:
             self.scaler = torch.cuda.amp.GradScaler(enabled=True)
         self.loss = loss
-        self.model = nn.DataParallel(model.cuda())
+
+        if CFG.distribute and args.local_rank != -1:
+            model.to(device)
+            self.model = DDP(model, device_ids=[args.local_rank])
+
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.optimizer = get_instance(

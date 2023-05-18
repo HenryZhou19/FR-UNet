@@ -14,7 +14,7 @@ from utils.helpers import dir_exists, remove_files
 
 def data_process(data_path, name, patch_size, stride, mode):
     save_path = os.path.join(data_path, f"{mode}_pro")
-    dir_exists(save_path)
+    dir_exists(save_path, must_new=True)
     remove_files(save_path)
     if name == "DRIVE":
         img_path = os.path.join(data_path, mode, "images")
