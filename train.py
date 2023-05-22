@@ -13,11 +13,11 @@ import torch
 
 def main(CFG, args):
     data_path = args.dataset_path
-    batch_size = args.batch_size
+    batch_size = args.batch_size  # = 512
     with_val = args.val
-    seed_torch()
+    seed_torch()  # seed_torch(seed=42)
 
-    device=None
+    device = None  # useless, just for filling the args in Trainer
     # if CFG.distribute and args.local_rank != -1:
     #     torch.cuda.set_device(args.local_rank)
     #     torch.distributed.init_process_group(backend='nccl', init_method='env://')
@@ -31,7 +31,7 @@ def main(CFG, args):
             val_dataset, batch_size, shuffle=False, num_workers=16, pin_memory=True, drop_last=False)
     else:
         train_dataset = vessel_dataset(data_path, mode="training")
-    
+
     # train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
     train_loader = DataLoader(
         # train_dataset, batch_size, sampler=train_sampler, shuffle=False, num_workers=16, pin_memory=True, drop_last=True)
@@ -58,11 +58,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-dp', '--dataset_path', default="datasets/DRIVE", type=str,
                         help='the path of dataset')
-    parser.add_argument('-bs', '--batch_size', default=512,
+    parser.add_argument('-bs', '--batch_size', default=64,  # 512
                         help='batch_size for trianing and validation')
     parser.add_argument("--val", help="split training data for validation",
                         required=False, default=False, action="store_true")
-    parser.add_argument('--local_rank', default=-1,type=int)
+    parser.add_argument('--local_rank', default=-1, type=int)
     args = parser.parse_args()
 
     with open('config.yaml', encoding='utf-8') as file:

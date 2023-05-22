@@ -1,6 +1,7 @@
 import os
 import pickle
 import random
+import shutil
 import cv2
 import numpy as np
 import torch
@@ -63,6 +64,11 @@ def dir_exists(path, must_new=False):
     else:
         if must_new:
             raise AssertionError
+
+
+def remove_dir(path):
+    if os.path.exists(path):
+        shutil.rmtree(path)
 
 
 def remove_files(path):

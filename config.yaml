@@ -30,4 +30,4 @@ DTI: false
 amp: true
 tta: false
 CCC: false
-distribute: true
+distribute: true  # useless
