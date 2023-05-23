@@ -90,27 +90,37 @@ def save_pickle(path, type, img_list):
         pickle.dump(img_list, file)
 
 
-def double_threshold_iteration(index,img, h_thresh, l_thresh, save=True):
+def double_threshold_iteration(index, img, h_thresh, l_thresh, save=True):
+    """
+    Args:
+        index: 图像序号
+        img: 实际为 pre (H, W) ,也即网络的输出结果 (未经过sigmoid) 
+        h_thresh: 高阈值 [0., 1.]
+        l_thresh: 低阈值 [0., 1.]
+    """
     h, w = img.shape
-    img = np.array(torch.sigmoid(img).cpu().detach()*255, dtype=np.uint8)
-    bin = np.where(img >= h_thresh*255, 255, 0).astype(np.uint8)
-    gbin = bin.copy()
-    gbin_pre = gbin-1
+    img = np.array(torch.sigmoid(img).cpu().detach()*255, dtype=np.uint8)  # 转换到 unint8 范围内再进行 DTI
+    bin = np.where(img >= h_thresh*255, 255, 0).astype(np.uint8)  # 255 或 0
+    gbin = bin.copy()  # 作为双阈值的最终结果
+    gbin_pre = gbin - 1  # 254 或 255(只是为了进下面的循环)
     while(gbin_pre.all() != gbin.all()):
-        gbin_pre = gbin
+        # 当前一次循环内对 gbin 有改动，则再次循环
+        gbin_pre = gbin  # 255 或 0
         for i in range(h):
             for j in range(w):
+                # 对于每一个像素位置，如果双阈值 gbin 目前不是前景，并且其比高阈值低，比低阈值高
                 if gbin[i][j] == 0 and img[i][j] < h_thresh*255 and img[i][j] >= l_thresh*255:
+                    # 并且其 8 邻域内至少存在一个已经被判为前景，则将该位置也作为前景
                     if gbin[i-1][j-1] or gbin[i-1][j] or gbin[i-1][j+1] or gbin[i][j-1] or gbin[i][j+1] or gbin[i+1][j-1] or gbin[i+1][j] or gbin[i+1][j+1]:
                         gbin[i][j] = 255
 
     if save:
-        cv2.imwrite(f"save_picture/bin{index}.png", bin)
+        cv2.imwrite(f"save_picture/bin{index}.png", bin)  # 单阈值的分割结果图
         cv2.imwrite(f"save_picture/gbin{index}.png", gbin)
-    return gbin/255
+    return gbin/255  # 转换到 float64 [0., 1.]，便于进行性能指标计算
 
 
-def recompone_overlap(preds, img_h, img_w, stride_h, stride_w):
+def recompone_overlap(preds, img_h, img_w, stride_h, stride_w):  # 没有使用
     assert (len(preds.shape) == 4)
     assert (preds.shape[1] == 1 or preds.shape[1] == 3)
     patch_h = preds.shape[2]

@@ -44,19 +44,19 @@ def data_process(data_path, name, patch_size, stride, mode):
     img2tensor = ToTensor()
     for i, file in enumerate(file_list):
         if name == "DRIVE":
-            img = Image.open(os.path.join(img_path, file))
-            gt = Image.open(os.path.join(gt_path, file[0:2] + "_manual1.gif"))
-            img = rgb2gray(img)  # 图像转灰度
-            img_list.append(img2tensor(img))
-            gt_list.append(img2tensor(gt))
+            img = Image.open(os.path.join(img_path, file))  # PIL(584, 565, 3)---[0, 255]
+            gt = Image.open(os.path.join(gt_path, file[0:2] + "_manual1.gif"))  # PIL(584, 565, 3)---[0, 255]
+            img = rgb2gray(img)  # PIL(584, 565)---[0, 255]
+            img_list.append(img2tensor(img))  # [tensor(1, 584, 565) , ...]---[0., 1.]
+            gt_list.append(img2tensor(gt))  # [tensor(1, 584, 565) , ...]---[0., 1.]
 
         elif name == "CHASEDB1":
             if len(file) == 13:  # 循环过程仅对 img 文件进行，gt 与之对应
-                if mode == "training" and int(file[6:8]) <= 10:  # PIL(960, 999, 3)---[0, 255]
-                    img = Image.open(os.path.join(data_path, file))
+                if mode == "training" and int(file[6:8]) <= 10:
+                    img = Image.open(os.path.join(data_path, file))  # PIL(960, 999, 3)---[0, 255]
                     gt = Image.open(os.path.join(
                         data_path, file[0:9] + '_1stHO.png'))  # PIL(960, 999)---[0, 255]
-                    img = rgb2gray(img)  # PIL(960, 999) [0, 255]
+                    img = rgb2gray(img)  # PIL(960, 999)---[0, 255]
                     img_list.append(img2tensor(img))  # [tensor(1, 960, 999) , ...]---[0., 1.]
                     gt_list.append(img2tensor(gt))  # [tensor(1, 960, 999) , ...]
                 elif mode == "test" and int(file[6:8]) > 10:

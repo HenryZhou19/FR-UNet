@@ -39,8 +39,9 @@ class Trainer:
         self.checkpoint_dir = os.path.join(
             CFG.save_dir, self.CFG['model']['type'], start_time)
         self.writer = tensorboard.SummaryWriter(self.checkpoint_dir)
-        dir_exists(self.checkpoint_dir)
-        cudnn.benchmark = True
+        # dir_exists(self.checkpoint_dir)  # 不需要，上一行已经新建了路径文件夹
+        cudnn.benchmark = True  # 使 cuDNN 的 auto-tuner 自动寻找最适合当前配置的高效算法，来达到优化运行效率的问题
+        # 如果网络模型一直变的话，不能设置 cudnn.benchmark=True，因为寻找最优卷积算法需要花费时间
 
     def train(self):
         for epoch in range(1, self.CFG.epochs + 1):
@@ -64,7 +65,7 @@ class Trainer:
             img = img.cuda(non_blocking=True)
             gt = gt.cuda(non_blocking=True)
             self.optimizer.zero_grad()
-            if self.CFG.amp is True:
+            if self.CFG.amp is True:  # automatic mixed precision，自动混合精度（节省显存并加快推理速度）
                 with torch.cuda.amp.autocast(enabled=True):
                     pre = self.model(img)
                     loss = self.loss(pre, gt)
@@ -80,7 +81,7 @@ class Trainer:
             self.batch_time.update(time.time() - tic)
             
             self._metrics_update(
-                *get_metrics(pre, gt, threshold=self.CFG.threshold).values())
+                *get_metrics(pre, gt, threshold=self.CFG.threshold).values())  # 输出 sigmoid 映射在此处进行
             tbar.set_description(
                 'TRAIN ({}) | Loss: {:.4f} | AUC {:.4f} F1 {:.4f} Acc {:.4f}  Sen {:.4f} Spe {:.4f} Pre {:.4f} IOU {:.4f} |B {:.2f} D {:.2f} |'.format(
                     epoch, self.total_loss.average, *self._metrics_ave().values(), self.batch_time.average, self.data_time.average))

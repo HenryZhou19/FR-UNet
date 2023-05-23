@@ -1,33 +1,47 @@
 model:
   type: FR_UNet
   args:
-    {}
+    {
+      # num_classes: 1,
+      # num_channels: 1,
+      # feature_scale: 2,
+      # dropout: 0.2,
+      # fuse: True,
+      # out_ave: True,
+    }
 
 loss:
   type: BCELoss
   args:
-    {}
+    {
+      # reduction: mean,
+      # pos_weight: 1.0,
+    }
 
 optimizer:
   type: Adam
   args:
-    lr: 1e-4
-    weight_decay: 1e-5
+    {
+      lr: 5e-4,  # 1e-4
+      weight_decay: 1e-5,
+    }
 
 lr_scheduler:
   type: CosineAnnealingLR
   args:
-    T_max: 40
+    {
+      T_max: 100,  # 40
+    }
 
-epochs: 40
+epochs: 100  # 40
 save_dir: saved/
 val_per_epochs: 1
 save_period: 1
 tensorboard: true
 threshold: 0.5
 threshold_low: 0.3
-DTI: false
-amp: true
-tta: false
-CCC: false
+DTI: true  # dual-threshold iterative，双阈值迭代推理（仅test）
+amp: true  # automatic mixed precision，自动混合精度（节省显存并加快推理速度）
+tta: false  # test-time augmentation，测试时数据增强（默认未开启）
+CCC: true  # count connect component，最终结果的连通区域计数（仅test）
 distribute: true  # useless

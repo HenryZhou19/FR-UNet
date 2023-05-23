@@ -39,9 +39,9 @@ class Tester(Trainer):
         with torch.no_grad():
             for i, (img, gt) in enumerate(tbar):
                 self.data_time.update(time.time() - tic)
-                img = img.cuda(non_blocking=True)
-                gt = gt.cuda(non_blocking=True)
-                pre = self.model(img)
+                img = img.cuda(non_blocking=True)  # (1, 1, square, square)
+                gt = gt.cuda(non_blocking=True)  # (1, 1, square, square)
+                pre = self.model(img)  # (1, 1, square, square)
                 loss = self.loss(pre, gt)
                 self.total_loss.update(loss.item())
                 self.batch_time.update(time.time() - tic)
@@ -52,14 +52,14 @@ class Tester(Trainer):
                     H, W = 960, 999
                 elif self.dataset_path.endswith("DCA1"):
                     H, W = 300, 300
-
+                # 将带有padding的结果恢复到原始的图像尺寸
                 if not self.dataset_path.endswith("CHUAC"):
-                    img = TF.crop(img, 0, 0, H, W)
-                    gt = TF.crop(gt, 0, 0, H, W)
-                    pre = TF.crop(pre, 0, 0, H, W)
-                img = img[0,0,...]
-                gt = gt[0,0,...]
-                pre = pre[0,0,...]
+                    img = TF.crop(img, 0, 0, H, W)  # (1, 1, H, W)
+                    gt = TF.crop(gt, 0, 0, H, W)  # (1, 1, H, W)
+                    pre = TF.crop(pre, 0, 0, H, W)  # (1, 1, H, W)
+                img = img[0,0,...]  # (H, W)
+                gt = gt[0,0,...]  # (H, W)
+                pre = pre[0,0,...]  # (H, W)
                 if self.show:
                     predict = torch.sigmoid(pre).cpu().detach().numpy()
                     predict_b = np.where(predict >= self.CFG.threshold, 1, 0)
@@ -68,9 +68,9 @@ class Tester(Trainer):
                     cv2.imwrite(
                         f"save_picture/gt{i}.png", np.uint8(gt.cpu().numpy()*255))
                     cv2.imwrite(
-                        f"save_picture/pre{i}.png", np.uint8(predict*255))
+                        f"save_picture/pre{i}.png", np.uint8(predict*255))  # 网络输出结果 + sigmoid
                     cv2.imwrite(
-                        f"save_picture/pre_b{i}.png", np.uint8(predict_b*255))
+                        f"save_picture/pre_b{i}.png", np.uint8(predict_b*255))  # 单阈值的分割结果图
 
                 if self.CFG.DTI:
                     pre_DTI = double_threshold_iteration(

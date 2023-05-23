@@ -13,7 +13,7 @@ class vessel_dataset(Dataset):
         self.is_val = is_val
         self.data_path = os.path.join(path, f"{mode}_pro")
         self.data_file = os.listdir(self.data_path)
-        self.img_file = self._select_img(self.data_file)
+        self.img_file = self._select_img()  # 选出文件夹中的图像文件名 img_xxx（文件夹内本身同时包含 img 和 gt）
         if split is not None and mode == "training":
             assert split > 0 and split < 1
             if not is_val:
@@ -43,9 +43,9 @@ class vessel_dataset(Dataset):
 
         return img, gt
 
-    def _select_img(self, file_list):
+    def _select_img(self):
         img_list = []
-        for file in file_list:
+        for file in self.data_file:
             if file[:3] == "img":
                 img_list.append(file)
 

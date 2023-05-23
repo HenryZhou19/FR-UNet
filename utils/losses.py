@@ -27,7 +27,7 @@ class BCELoss(nn.Module):
             reduction=reduction, pos_weight=pos_weight)
 
     def forward(self, prediction, targets):
-        return self.bce_loss(prediction, targets)
+        return self.bce_loss(prediction, targets)  # (B, 1, H, W); (B, 1, H, W)
 
 
 class CELoss(nn.Module):

@@ -38,9 +38,9 @@ def main(CFG, args):
         train_dataset, batch_size, shuffle=True, num_workers=16, pin_memory=True, drop_last=True)
 
     logger.info('The patch number of train is %d' % len(train_dataset))
-    model = get_instance(models, 'model', CFG)
+    model = get_instance(models, 'model', CFG)  # 取出 models 模块中的 CFG['model']，也即 models.fr_unet.FR_UNet()
     logger.info(f'\n{model}\n')
-    loss = get_instance(losses, 'loss', CFG)
+    loss = get_instance(losses, 'loss', CFG)  # 取出 losses 模块中的 CFG['loss']，也即 utils.losses.BCELoss()
     trainer = Trainer(
         model=model,
         loss=loss,
@@ -58,7 +58,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-dp', '--dataset_path', default="datasets/DRIVE", type=str,
                         help='the path of dataset')
-    parser.add_argument('-bs', '--batch_size', default=64,  # 512
+    parser.add_argument('-bs', '--batch_size', default=16,  # 512
                         help='batch_size for trianing and validation')
     parser.add_argument("--val", help="split training data for validation",
                         required=False, default=False, action="store_true")

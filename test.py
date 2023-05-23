@@ -14,10 +14,10 @@ def main(data_path, weight_path, CFG, show):
     checkpoint = torch.load(weight_path)
     CFG_ck = checkpoint['config']
     test_dataset = vessel_dataset(data_path, mode="test")
-    test_loader = DataLoader(test_dataset, 1,
+    test_loader = DataLoader(test_dataset, batch_size=1,
                              shuffle=False,  num_workers=16, pin_memory=True)
     model = get_instance(models, 'model', CFG)
-    loss = get_instance(losses, 'loss', CFG_ck)
+    loss = get_instance(losses, 'loss', CFG_ck)  # loss 函数要从 checkpoint 保存的训练时 config 中获取？
     test = Tester(model, loss, CFG, checkpoint, test_loader, data_path, show)
     test.test()
 
